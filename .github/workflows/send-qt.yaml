@@ -13,7 +13,7 @@ jobs:
       
       - uses: actions/checkout@v3
         with:
-          repository: myeongjunkim/bansuc-api-bot
+          repository: myeongjunkim/bansuk-api-bot
           ref: main
       
       - uses: abatilo/actions-poetry@v2
