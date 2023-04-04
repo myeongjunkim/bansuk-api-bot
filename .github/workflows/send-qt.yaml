@@ -17,6 +17,10 @@ jobs:
           repository: myeongjunkim/bansuk-api-bot
           ref: main
       
+      - uses: szenius/set-timezone@v1.0
+        with:
+          timezoneLinux: "Asia/Seoul"
+
       - uses: abatilo/actions-poetry@v2
         with:
           poetry-version: "1.3.2"
