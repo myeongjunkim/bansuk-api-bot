@@ -30,6 +30,7 @@ jobs:
           poetry install --sync
 
       - run: |
-          poetry run scripts/example.py \
+          chmod +x scripts/example.py \
+          poetry run scripts/example.py 
           
 
