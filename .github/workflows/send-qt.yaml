@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 23 * * *'
+    - cron: '0 20 * * *'
 
 jobs:
   send-qt:
@@ -31,6 +31,8 @@ jobs:
           poetry install --sync
 
       - run: |
-          poetry run scripts/example.py 
-          
-
+          poetry run python scripts/example.py 
+          poetry run python scripts/send_message.py \
+          --webhook_url=${{ secrets.SLACK_QT_WEBHOOK_URI }} \
+          --google_api_key=${{ secrets.GOOGLE_API_KEY }} \
+          --playlist_id=${{ secrets.AKKABAE_PLAYLIST_ID }}
