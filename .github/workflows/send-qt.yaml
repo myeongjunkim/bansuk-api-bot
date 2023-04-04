@@ -1,0 +1,35 @@
+name: Send QT from 매일성경
+
+on:
+  push:
+    branches:
+      - main
+  
+
+jobs:
+  send-qt:
+    runs-on: ubuntu-latest
+    steps:
+      
+      - uses: actions/checkout@v3
+        with:
+          repository: myeongjunkim/bansuc-api-bot
+          ref: main
+      
+      - uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "1.3.2"
+      
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: "poetry"
+      
+      - name: install dependencies
+        run: |
+          poetry install --sync
+
+      - run: |
+          poetry run scripts/example.py \
+          
+
