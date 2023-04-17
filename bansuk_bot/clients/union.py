@@ -1,8 +1,11 @@
 # 성서유니온
-import requests
 from datetime import datetime
 
+import requests
+
 from bansuk_bot.schemas import BodyBible, BodyBibleContent
+
+import tenacity
 
 class unionClient:
     
@@ -12,7 +15,14 @@ class unionClient:
         self.body_top_path = "/Ajax/Bible/BodyTop"
         self.body_bible_path = "/Ajax/Bible/BodyBible"
         self.body_bible_content_path = "/Ajax/Bible/BodyBibleCont"
+        self._request_data()
         
+    @tenacity.retry(
+        wait=tenacity.wait_fixed(5),
+        stop=tenacity.stop_after_attempt(3),
+        retry=tenacity.retry_if_exception_type(TimeoutError),
+    )
+    def _request_data(self) -> None:
         self.top = self._get_top()
         self.bible = self._get_bible()
         self.content = self._get_bible_content()

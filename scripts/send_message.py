@@ -1,7 +1,8 @@
 from bansuk_bot.clients.union import unionClient
 from bansuk_bot.clients.youtube import youtubeClient
 from bansuk_bot.schemas import BodyBible, BodyBibleContent
-import click, requests
+import click
+import requests
 
 
 @click.command(help="CLI for sending message to slack.")

@@ -31,8 +31,11 @@ jobs:
         run: |
           poetry install --sync
 
-      - run: |
+      - name: send message
+        run: |
           poetry run python scripts/send_message.py \
           --webhook_url=${{ secrets.SLACK_QT_WEBHOOK_URI }} \
           --google_api_key=${{ secrets.GOOGLE_API_KEY }} \
           --playlist_id=${{ secrets.AKKABAE_PLAYLIST_ID }}
+        
+        
