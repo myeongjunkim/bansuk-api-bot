@@ -28,7 +28,7 @@ def create_message(
     
     content_text = f"\" {body_bible_content.content_title} \"\n\n"
     for line in body_bible_content.content_data:
-        content_text= content_text + f"*{list(line.keys())[0]}*\n\n{list(line.values())[0]}\n\n"
+        content_text= content_text + f"*📌 {list(line.keys())[0]}*\n\n{list(line.values())[0]}\n\n"
     content_text = content_text.replace('<br>', '\n')
 
     
