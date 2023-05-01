@@ -63,7 +63,7 @@ def send_message(webhook_url:str, message: str) -> None:
                 }]
             },
         ],
-        "text":f"<{message['url']}|YOUTUBE 아까배>" if message['url'] else "-"
+        "text":f"<{message['url']}|YOUTUBE 아까배>" if message['url'] else pre_text
     }
     requests.post(url=webhook_url, json=data)
 
