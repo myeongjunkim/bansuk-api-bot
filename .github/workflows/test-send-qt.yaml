@@ -1,8 +1,10 @@
-name: Send QT from 매일성경
+name: Send QT from 매일성경 - test
 
 on:
-  schedule:
-    - cron: '0 22 * * 0-4'
+  push:
+    branches:
+        - main
+    
 
 jobs:
   send-qt:
@@ -34,7 +36,7 @@ jobs:
       - name: send message
         run: |
           poetry run python scripts/send_message.py \
-          --webhook_url=${{ secrets.SLACK_QT_WEBHOOK_URI }} \
+          --webhook_url=${{ secrets.SLACK_QT_WEBHOOK_URI_TEST }} \
           --google_api_key=${{ secrets.GOOGLE_API_KEY }} \
           --channel_id=${{ secrets.BANSUK_YOUTUBE_CHANNEL_ID }}
         

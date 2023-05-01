@@ -7,12 +7,12 @@ import requests
 
 @click.command(help="CLI for sending message to slack.")
 @click.option("--google_api_key", "-k", type=click.STRING, required=True)
-@click.option("--playlist_id", "-p", type=click.STRING, required=True)
+@click.option("--channel_id", "-c", type=click.STRING, required=True)
 @click.option("--webhook_url", "-w", type=click.STRING, required=True)
-def main(google_api_key: str, playlist_id:str, webhook_url:str) -> None:
+def main(google_api_key: str, channel_id:str, webhook_url:str) -> None:
     youtube_client = youtubeClient(google_api_key)
     union_client = unionClient()
-    youtube_url = youtube_client.get_today_vidio(playlist_id)
+    youtube_url = youtube_client.get_today_video_from_channel(channel_id)
     body_bible = union_client.fetch_body_bible()
     body_bible_content = union_client.fetch_body_bible_content()
     message = create_message(youtube_url, body_bible, body_bible_content)
@@ -63,11 +63,9 @@ def send_message(webhook_url:str, message: str) -> None:
                 }]
             },
         ],
-        "text":f"<{message['url']}|YOUTUBE 아까배>"
+        "text":f"<{message['url']}|YOUTUBE 아까배>" if message['url'] else "-"
     }
     requests.post(url=webhook_url, json=data)
-
-    
 
 
 main()
