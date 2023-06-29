@@ -2,7 +2,7 @@ name: Send QT from 매일성경
 
 on:
   schedule:
-    - cron: '0 21 * * 0-5'
+    - cron: '50 20 * * 0-5'
 
 jobs:
   send-qt:
