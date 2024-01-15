@@ -56,10 +56,12 @@ class youtubeClient:
         description = video['snippet']['description']
         date_info = re.search(r'\d{4}년 \d+월 \d+일', description)
         if not date_info:
+            print(description)
             return False
         date_info = date_info.group()
         date_obj = datetime.strptime(date_info, '%Y년 %m월 %d일')
         if date_obj.date() == datetime.today().date():
             return True
+        print(date_obj.date(), datetime.today().date())
         return False
         
