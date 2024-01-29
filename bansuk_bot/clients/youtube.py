@@ -48,7 +48,7 @@ class youtubeClient:
     
     def _is_akkabae_video(self, video: dict) -> bool:
         title = video['snippet']['title']
-        if '아.까.배' in title:
+        if '아.까.배' in title or '아까배' in title:
             return True
         return False
     
