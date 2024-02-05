@@ -41,7 +41,7 @@ def create_message(
     }
 
 
-def send_message(webhook_url:str, message: str) -> None:
+def send_message(webhook_url: str, message: dict[str, str]) -> None:
     pre_text = message["date"]+ "\n" + message["title"]
     data = {
         "attachments":[

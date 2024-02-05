@@ -1,8 +1,8 @@
 # https://developers.google.com/youtube/v3/guides/implementation/videos?hl=ko
 
 from googleapiclient.discovery import build
-import re
-from datetime import datetime
+from datetime import datetime, timedelta
+
 
 class youtubeClient:
     def __init__(self, google_api_key: str) -> None:
@@ -23,7 +23,7 @@ class youtubeClient:
                 continue
             video_id = video['id']['videoId']
             return f'https://youtu.be/{video_id}'
-        return None
+        return ""
 
     def _fetch_playlist_videos(self, playlist_id: str) -> dict:
         youtube = build('youtube', 'v3', developerKey=self.google_api_key)
@@ -53,15 +53,15 @@ class youtubeClient:
         return False
     
     def _is_today_video(self, video: dict) -> bool:
-        description = video['snippet']['description']
-        date_info = re.search(r'\d{4}년 \d+월 \d+일', description)
-        if not date_info:
-            print(description)
-            return False
-        date_info = date_info.group()
-        date_obj = datetime.strptime(date_info, '%Y년 %m월 %d일')
-        if date_obj.date() == datetime.today().date():
+        published_at = video['snippet']['publishedAt']
+        time_delta = datetime.now() - self._convert_date(published_at)
+        if time_delta < timedelta(days=1):
             return True
-        print(date_obj.date(), datetime.today().date())
+        print(video['snippet']['title'])
         return False
+        
+
+    def _convert_date(self, date_str: str) -> datetime:
+        utc_dt = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
+        return utc_dt + timedelta(hours=9)
         
