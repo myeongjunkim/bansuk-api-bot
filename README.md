@@ -12,7 +12,7 @@
 - Github actions 와 slack 수신 webhook을 이용한 slack message 스캐줄링
 - youtube data api 를 활용하여 영상 데이터 fetching 을 위한 Youtube client 활용
 - [성서유니온선교회](https://sum.su.or.kr:8888/bible/today) 의 api 를 활용하여 UnionClient 구현
-- staging 채널을 따로 만들어 test
+- staging 채널을 통한 test 진행
 
 ## 이미지
 
