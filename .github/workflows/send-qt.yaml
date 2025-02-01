@@ -2,18 +2,17 @@ name: Send QT from 매일성경
 
 on:
   schedule:
-    - cron: '50 20 * * 0-5'
+    - cron: "50 20 * * 0-5"
 
 jobs:
   send-qt:
     runs-on: ubuntu-latest
     steps:
-      
       - uses: actions/checkout@v3
         with:
           repository: myeongjunkim/bansuk-api-bot
           ref: main
-      
+
       - uses: szenius/set-timezone@v1.0
         with:
           timezoneLinux: "Asia/Seoul"
@@ -21,12 +20,12 @@ jobs:
       - uses: abatilo/actions-poetry@v2
         with:
           poetry-version: "1.3.2"
-      
+
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
           cache: "poetry"
-      
+
       - name: install dependencies
         run: |
           poetry install --sync
@@ -34,8 +33,6 @@ jobs:
       - name: send message
         run: |
           poetry run python scripts/send_message.py \
-          --webhook_url=${{ secrets.SLACK_QT_WEBHOOK_URI }} \
-          --google_api_key=${{ secrets.GOOGLE_API_KEY }} \
-          --channel_id=${{ secrets.BANSUK_YOUTUBE_CHANNEL_ID }}
-        
-        
+          --webhook_url=${{ secrets.SLACK_QT_WEBHOOK_URI }} 
+          # --google_api_key=${{ secrets.GOOGLE_API_KEY }} \
+          # --channel_id=${{ secrets.BANSUK_YOUTUBE_CHANNEL_ID }}
