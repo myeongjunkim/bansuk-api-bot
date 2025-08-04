@@ -184,6 +184,7 @@ def send_message(webhook_url: str, message: dict) -> None:
         print("python scripts/send_message.py -w YOUR_WEBHOOK_URL --test")
     else:
         print("✅ Message sent successfully!")
+        
 
 
 
