@@ -2,6 +2,7 @@
 
 from googleapiclient.discovery import build
 from datetime import datetime, timedelta
+from youtube_transcript_api import YouTubeTranscriptApi
 
 
 class youtubeClient:
@@ -64,4 +65,26 @@ class youtubeClient:
     def _convert_date(self, date_str: str) -> datetime:
         utc_dt = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
         return utc_dt + timedelta(hours=9)
+        
+    def search_videos(self, query: str, max_results: int = 10) -> list:
+        """검색어로 동영상을 검색하고 ID 목록을 반환합니다."""
+        youtube = build('youtube', 'v3', developerKey=self.google_api_key)
+        search_response = youtube.search().list(
+            q=query,
+            part="id,snippet",
+            maxResults=max_results,
+            type='video',
+            videoCaption='closedCaption'
+        ).execute()
+        
+        return [item['id']['videoId'] for item in search_response.get('items', [])]
+
+    def get_transcript(self, video_id: str) -> str:
+        """동영상의 자막을 가져옵니다."""
+        try:
+            transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=['ko','en'])
+            return " ".join([t['text'] for t in transcript_list])
+        except Exception as e:
+            print(f"Error fetching transcript for video {video_id}: {e}")
+            return None
         
