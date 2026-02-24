@@ -34,5 +34,5 @@ jobs:
         run: |
           poetry run python scripts/send_message.py \
           --webhook_url=${{ secrets.SLACK_QT_WEBHOOK_URI }} 
-          # --google_api_key=${{ secrets.GOOGLE_API_KEY }} \
-          # --channel_id=${{ secrets.BANSUK_YOUTUBE_CHANNEL_ID }}
+          --google_api_key=${{ secrets.GOOGLE_API_KEY }} \
+          --channel_id=${{ secrets.UNION_YOUTUBE_CHANNEL_ID }}

@@ -1,27 +1,28 @@
 from bansuk_bot.clients.union import unionClient
-# from bansuk_bot.clients.youtube import youtubeClient
+from bansuk_bot.clients.youtube import youtubeClient
 from bansuk_bot.schemas import BodyBible, BodyBibleContent
 import click
 import requests
 import json
+from datetime import datetime
 
 
 @click.command(help="CLI for sending message to slack.")
-# @click.option("--google_api_key", "-k", type=click.STRING, required=True)
-# @click.option("--channel_id", "-c", type=click.STRING, required=True)
+@click.option("--google_api_key", "-k", type=click.STRING, required=True)
+@click.option("--channel_id", "-c", type=click.STRING, required=True)
 @click.option("--webhook_url", "-w", type=click.STRING, required=True)
-def main(webhook_url: str) -> None:
-    # youtube_client = youtubeClient(google_api_key)
-    # youtube_url = youtube_client.get_today_video_from_channel(channel_id)
+def main(google_api_key: str, channel_id: str, webhook_url: str) -> None:
+    youtube_client = youtubeClient(google_api_key)
+    youtube_url = youtube_client.get_union_video_url_from_channel(channel_id, datetime.now())
     union_client = unionClient()
     body_bible = union_client.fetch_body_bible()
     body_bible_content = union_client.fetch_body_bible_content()
-    message = create_message(body_bible, body_bible_content)
+    message = create_message(body_bible, body_bible_content, youtube_url)
     send_message(webhook_url, message)
 
 
 def create_message(
-    body_bible: BodyBible, body_bible_content: BodyBibleContent
+    body_bible: BodyBible, body_bible_content: BodyBibleContent, youtube_url: str
 ) -> dict:
     """
     Create a Slack Block Kit formatted message for the Bible content.
@@ -58,9 +59,8 @@ def create_message(
         
         return chunks
     
-    # Create header text (max 150 characters for plain_text header)
-    header_text = f"{body_bible.date}({body_bible.week_day})\n{body_bible.title}"
-    header_text = truncate_text(header_text, 150)
+    # Create header text with YouTube link (using section for mrkdwn support)
+    header_text = f"{body_bible.date}({body_bible.week_day})\n*<{youtube_url}|{body_bible.title}>*"
     
     # Format bible text with verse numbers
     bible_text = ""
@@ -71,13 +71,12 @@ def create_message(
     
     # Create the main blocks array
     blocks = [
-        # Header with date and title
+        # Header with date and title as a link
         {
-            "type": "header",
+            "type": "section",
             "text": {
-                "type": "plain_text",
-                "text": header_text,
-                "emoji": True  # Fixed: changed from True to true (JSON boolean)
+                "type": "mrkdwn",
+                "text": header_text
             }
         },
         
@@ -153,7 +152,7 @@ def create_message(
     
     # Return complete Slack webhook payload
     return {
-        "text": f"{body_bible.date}({body_bible.week_day})\n{body_bible.title}",  # Fallback text with line break
+        "text": f"{body_bible.date}({body_bible.week_day})\n<{youtube_url}|{body_bible.title}>", 
         "blocks": blocks
     }
 

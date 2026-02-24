@@ -9,6 +9,18 @@ class youtubeClient:
     def __init__(self, google_api_key: str) -> None:
         self.google_api_key = google_api_key
     
+    def get_union_video_url_from_channel(self, channel_id: str, date: datetime) -> str:
+        videos = self._fetch_channel_videos(channel_id)['items']
+        date_str = date_str = f"{date.year}. {date.month}. {date.day}."
+        for video in videos:
+            if "매일성경" not in video['snippet']['title']:
+                continue
+            if date_str not in video['snippet']['description']:
+                continue
+            video_id = video['id']['videoId']
+            return f'https://youtu.be/{video_id}'
+        return ""
+
     def get_today_video_from_playlist(self, playlist_id: str) -> str:
         videos = self._fetch_playlist_videos(playlist_id)['items']
         lastest_video = videos[0]
