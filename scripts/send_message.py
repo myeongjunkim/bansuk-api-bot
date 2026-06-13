@@ -152,7 +152,9 @@ def create_message(
     
     # Return complete Slack webhook payload
     return {
-        "text": f"{body_bible.date}({body_bible.week_day})\n<{youtube_url}|{body_bible.title}>", 
+        # 푸시 알림 미리보기에 쓰이는 fallback 텍스트. mrkdwn 링크 마크업을
+        # 넣으면 알림에 URL이 그대로 노출되므로 순수 텍스트만 사용한다.
+        "text": f"{body_bible.date}({body_bible.week_day})\n{body_bible.title}",
         "blocks": blocks
     }
 
