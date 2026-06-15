@@ -1,12 +1,13 @@
 name: Auto-rerun Send QT on failure
 
-# prod 워크플로우(Send QT from 매일성경)가 실패하면, 막힌/불운한 Azure egress
+# prod 워크플로우(매일성경/매일성경 순)가 실패하면, 막힌/불운한 Azure egress
 # IP를 새 IP로 바꾸기 위해 실패한 run을 다시 실행한다. 새 run = 새 러너 = 새 IP.
 # run_attempt로 최대 재시도 횟수를 제한해 무한루프를 막는다.
+# 두 워크플로우를 각각 독립적으로 커버한다(실패한 run만 재실행 → 중복 발송 없음).
 
 on:
   workflow_run:
-    workflows: ["Send QT from 매일성경"]
+    workflows: ["Send QT from 매일성경", "Send QT from 매일성경 순"]
     types:
       - completed
 
