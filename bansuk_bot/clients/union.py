@@ -20,7 +20,9 @@ DEFAULT_BASE_URL = "https://sum.su.or.kr:8888"
 
 class unionClient:
 
-    def __init__(self) -> None:
+    def __init__(self, qt_ty: str = "QT1") -> None:
+        # qt_ty: 'QT1'=매일성경, 'QT6'=매일성경 순. 응답 구조는 동일하다.
+        self.qt_ty = qt_ty
         self.today = datetime.today().strftime('%Y-%m-%d')
         # 빈 문자열(시크릿 미설정 시 GitHub이 ""로 주입)도 기본값으로 처리하도록 `or` 사용.
         self.url = (os.environ.get("UNION_PROXY_BASEURL") or DEFAULT_BASE_URL).rstrip("/")
@@ -52,7 +54,7 @@ class unionClient:
     def _get_top(self) -> dict:
         response = requests.post(
             url=self.url + self.body_top_path,
-            data={ 'qt_ty' : 'QT1' , 'Base_de' : self.today},
+            data={ 'qt_ty' : self.qt_ty , 'Base_de' : self.today},
             headers=self._headers(),
             timeout=REQUEST_TIMEOUT,
         )
@@ -61,7 +63,7 @@ class unionClient:
     def _get_bible(self) -> dict:
         response = requests.post(
             url=self.url + self.body_bible_path,
-            data={ 'qt_ty' : 'QT1' , 'Base_de' : self.today},
+            data={ 'qt_ty' : self.qt_ty , 'Base_de' : self.today},
             headers=self._headers(),
             timeout=REQUEST_TIMEOUT,
         )
@@ -70,7 +72,7 @@ class unionClient:
     def _get_bible_content(self) -> dict:
         response = requests.post(
             url=self.url + self.body_bible_content_path,
-            data={ 'qt_ty' : 'QT1' , 'Base_de' : self.today, 'Bibletype' : '1'},
+            data={ 'qt_ty' : self.qt_ty , 'Base_de' : self.today, 'Bibletype' : '1'},
             headers=self._headers(),
             timeout=REQUEST_TIMEOUT,
         )

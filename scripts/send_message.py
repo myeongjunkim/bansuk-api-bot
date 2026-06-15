@@ -17,11 +17,13 @@ SOCKET_TIMEOUT = 30
 @click.option("--google_api_key", "-k", type=click.STRING, required=True)
 @click.option("--channel_id", "-c", type=click.STRING, required=True)
 @click.option("--webhook_url", "-w", type=click.STRING, required=True)
-def main(google_api_key: str, channel_id: str, webhook_url: str) -> None:
+@click.option("--qt_ty", "-q", type=click.STRING, default="QT1",
+              help="QT1=매일성경, QT6=매일성경 순")
+def main(google_api_key: str, channel_id: str, webhook_url: str, qt_ty: str) -> None:
     socket.setdefaulttimeout(SOCKET_TIMEOUT)
     youtube_client = youtubeClient(google_api_key)
     youtube_url = youtube_client.get_union_video_url_from_channel(channel_id, datetime.now())
-    union_client = unionClient()
+    union_client = unionClient(qt_ty)
     body_bible = union_client.fetch_body_bible()
     body_bible_content = union_client.fetch_body_bible_content()
     message = create_message(body_bible, body_bible_content, youtube_url)
@@ -66,8 +68,10 @@ def create_message(
         
         return chunks
     
-    # Create header text with YouTube link (using section for mrkdwn support)
-    header_text = f"{body_bible.date}({body_bible.week_day})\n*<{youtube_url}|{body_bible.title}>*"
+    # Create header text. YouTube 영상이 매칭됐을 때만 제목을 링크로 감싼다.
+    # (매일성경 순 등 영상이 없으면 youtube_url이 비어 <|제목>으로 깨지므로 분기)
+    title_md = f"<{youtube_url}|{body_bible.title}>" if youtube_url else body_bible.title
+    header_text = f"{body_bible.date}({body_bible.week_day})\n*{title_md}*"
     
     # Format bible text with verse numbers
     bible_text = ""
