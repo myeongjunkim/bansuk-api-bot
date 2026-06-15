@@ -3,8 +3,14 @@ from bansuk_bot.clients.youtube import youtubeClient
 from bansuk_bot.schemas import BodyBible, BodyBibleContent
 import click
 import requests
+import socket
 import json
 from datetime import datetime
+
+# YouTube(googleapiclient)는 per-call 타임아웃을 노출하지 않아, 막힌 IP를 만나면
+# 무한 대기에 빠진다. 전역 소켓 타임아웃을 백스톱으로 걸어 어떤 호출이든
+# 일정 시간 내에 실패하도록 한다. (union의 requests는 자체 timeout이 우선 적용됨)
+SOCKET_TIMEOUT = 30
 
 
 @click.command(help="CLI for sending message to slack.")
@@ -12,6 +18,7 @@ from datetime import datetime
 @click.option("--channel_id", "-c", type=click.STRING, required=True)
 @click.option("--webhook_url", "-w", type=click.STRING, required=True)
 def main(google_api_key: str, channel_id: str, webhook_url: str) -> None:
+    socket.setdefaulttimeout(SOCKET_TIMEOUT)
     youtube_client = youtubeClient(google_api_key)
     youtube_url = youtube_client.get_union_video_url_from_channel(channel_id, datetime.now())
     union_client = unionClient()
@@ -175,7 +182,7 @@ def send_message(webhook_url: str, message: dict) -> None:
         return
     
     # The message is already in the correct Slack webhook format
-    result = requests.post(url=webhook_url, json=message)
+    result = requests.post(url=webhook_url, json=message, timeout=(5, 30))
     print(f"Status Code: {result.status_code}")
     print(f"Response: {result.text}")
 
