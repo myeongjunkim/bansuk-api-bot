@@ -7,8 +7,13 @@ from bansuk_bot.schemas import BodyBible, BodyBibleContent
 
 import tenacity
 
+# (connect, read) 타임아웃(초). connect를 명시하지 않으면 연결이 막혔을 때
+# OS 기본값까지(약 2분) 매달리므로 짧게 끊고 재시도하도록 한다.
+REQUEST_TIMEOUT = (5, 30)
+
+
 class unionClient:
-    
+
     def __init__(self) -> None:
         self.today = datetime.today().strftime('%Y-%m-%d')
         self.url = "https://sum.su.or.kr:8888"
@@ -16,11 +21,16 @@ class unionClient:
         self.body_bible_path = "/Ajax/Bible/BodyBible"
         self.body_bible_content_path = "/Ajax/Bible/BodyBibleCont"
         self._request_data()
-        
+
     @tenacity.retry(
-        wait=tenacity.wait_fixed(5),
-        stop=tenacity.stop_after_attempt(3),
-        retry=tenacity.retry_if_exception_type(TimeoutError),
+        # 짧은 네트워크 블립(DNS 실패·간헐적 연결 끊김)을 흡수하기 위해
+        # 지수 백오프로 재시도한다. requests가 던지는 예외는 builtin
+        # TimeoutError가 아니라 RequestException 계열이므로 그걸로 잡아야
+        # 실제로 재시도가 걸린다.
+        wait=tenacity.wait_exponential(multiplier=2, min=2, max=20),
+        stop=tenacity.stop_after_attempt(5),
+        retry=tenacity.retry_if_exception_type(requests.exceptions.RequestException),
+        reraise=True,
     )
     def _request_data(self) -> None:
         self.top = self._get_top()
@@ -29,8 +39,9 @@ class unionClient:
 
     def _get_top(self) -> dict:
         response = requests.post(
-            url=self.url + self.body_top_path, 
+            url=self.url + self.body_top_path,
             data={ 'qt_ty' : 'QT1' , 'Base_de' : self.today},
+            timeout=REQUEST_TIMEOUT,
         )
         return response.json()
 
@@ -38,6 +49,7 @@ class unionClient:
         response = requests.post(
             url=self.url + self.body_bible_path,
             data={ 'qt_ty' : 'QT1' , 'Base_de' : self.today},
+            timeout=REQUEST_TIMEOUT,
         )
         return response.json()
 
@@ -45,6 +57,7 @@ class unionClient:
         response = requests.post(
             url=self.url + self.body_bible_content_path,
             data={ 'qt_ty' : 'QT1' , 'Base_de' : self.today, 'Bibletype' : '1'},
+            timeout=REQUEST_TIMEOUT,
         )
         return response.json()
 

@@ -1,0 +1,33 @@
+name: Auto-rerun Send QT on failure
+
+# prod 워크플로우(Send QT from 매일성경)가 실패하면, 막힌/불운한 Azure egress
+# IP를 새 IP로 바꾸기 위해 실패한 run을 다시 실행한다. 새 run = 새 러너 = 새 IP.
+# run_attempt로 최대 재시도 횟수를 제한해 무한루프를 막는다.
+
+on:
+  workflow_run:
+    workflows: ["Send QT from 매일성경"]
+    types:
+      - completed
+
+permissions:
+  actions: write
+
+env:
+  MAX_ATTEMPTS: 3
+
+jobs:
+  rerun:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt < 3
+    steps:
+      - name: Re-run failed jobs (new runner = new IP)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        run: |
+          echo "Run ${RUN_ID} failed on attempt ${ATTEMPT} (max ${MAX_ATTEMPTS}). Re-running failed jobs..."
+          gh run rerun "${RUN_ID}" --failed --repo "${{ github.repository }}"
