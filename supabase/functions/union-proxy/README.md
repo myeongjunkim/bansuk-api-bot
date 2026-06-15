@@ -56,7 +56,7 @@ union에 못 닿는 것이므로 다른 경로(GitLab CI 등) 검토.
 
 | 이름 | 값 |
 |---|---|
-| `UNION_BASE_URL` | `https://<REF>.supabase.co/functions/v1/union-proxy` |
+| `UNION_PROXY_BASEURL` | `https://<REF>.supabase.co/functions/v1/union-proxy` |
 | `UNION_PROXY_TOKEN` | 위 `PROXY_TOKEN`과 동일 |
 
 설정되면 [`bansuk_bot/clients/union.py`](../../../bansuk_bot/clients/union.py)가 직접 호출

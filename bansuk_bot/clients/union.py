@@ -13,8 +13,8 @@ import tenacity
 REQUEST_TIMEOUT = (5, 30)
 
 # union API의 직접 주소. GitHub Actions(Azure) egress가 이 서버에 간헐적으로
-# 차단되므로, 비-Azure 네트워크(Deno Deploy 등)에 올린 프록시를 거치도록
-# UNION_BASE_URL 환경변수로 덮어쓸 수 있다. 미설정 시 직접 호출(로컬 등).
+# 차단되므로, 비-Azure 네트워크(Supabase Edge Function 등)에 올린 프록시를 거치도록
+# UNION_PROXY_BASEURL 환경변수로 덮어쓸 수 있다. 미설정 시 직접 호출(로컬 등).
 DEFAULT_BASE_URL = "https://sum.su.or.kr:8888"
 
 
@@ -23,7 +23,7 @@ class unionClient:
     def __init__(self) -> None:
         self.today = datetime.today().strftime('%Y-%m-%d')
         # 빈 문자열(시크릿 미설정 시 GitHub이 ""로 주입)도 기본값으로 처리하도록 `or` 사용.
-        self.url = (os.environ.get("UNION_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
+        self.url = (os.environ.get("UNION_PROXY_BASEURL") or DEFAULT_BASE_URL).rstrip("/")
         self._proxy_token = os.environ.get("UNION_PROXY_TOKEN") or None
         self.body_top_path = "/Ajax/Bible/BodyTop"
         self.body_bible_path = "/Ajax/Bible/BodyBible"
