@@ -1,0 +1,6 @@
+# Supabase CLI 설정. 이 repo는 union-proxy Edge Function 배포에만 사용한다.
+project_id = "bansuk-api-bot"
+
+# 프록시는 자체 x-proxy-token 헤더로 인증하므로 Supabase JWT 검증은 끈다.
+[functions.union-proxy]
+verify_jwt = false

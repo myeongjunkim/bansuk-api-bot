@@ -1,35 +1,36 @@
-// 성서유니온(sum.su.or.kr:8888) 전용 얇은 프록시.
+// 성서유니온(sum.su.or.kr:8888) 전용 얇은 프록시 — Supabase Edge Function.
 //
 // 배경: GitHub Actions(Azure) egress IP가 union 서버에 간헐적으로 차단된다.
-// Deno Deploy는 비-Azure 네트워크 + 임의 포트(8888) outbound를 허용하므로,
-// GitHub Actions -> 이 프록시 -> union 순으로 호출하면 차단을 우회한다.
+// Supabase Edge Function은 Deno 런타임(비-Azure, 임의 포트 8888 outbound 허용)이라
+// 여기를 거쳐 호출하면 차단을 우회한다.
+//   GitHub Actions ──> 이 함수 ──> sum.su.or.kr:8888
 //
-// 배포: https://dash.deno.com 에서 새 Playground/Project 생성 후 이 파일 내용을
-// 붙여넣고, 환경변수 PROXY_TOKEN 에 임의의 시크릿 문자열을 설정한다.
-//
-// 보안: 오픈 릴레이 방지를 위해 x-proxy-token 헤더가 PROXY_TOKEN과 일치할 때만
-// 동작한다. 업스트림은 union으로 고정되어 임의 URL 프록시로 악용될 수 없다.
+// 호출 예: https://<ref>.supabase.co/functions/v1/union-proxy/Ajax/Bible/BodyTop
+// 인증: x-proxy-token 헤더가 PROXY_TOKEN 과 일치해야 함 (verify_jwt=false).
 
 const UPSTREAM = "https://sum.su.or.kr:8888";
 const TOKEN = Deno.env.get("PROXY_TOKEN");
 
 Deno.serve(async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
+  // Supabase는 /functions/v1/union-proxy 접두사를 포함해 전달하므로 떼어내
+  // union의 실제 경로(/Ajax/...)만 추출한다.
+  const path = url.pathname
+    .replace(/^\/functions\/v1/, "")
+    .replace(/^\/union-proxy/, "");
 
-  // 헬스체크용
-  if (url.pathname === "/" || url.pathname === "/health") {
+  // 헬스체크
+  if (path === "" || path === "/") {
     return new Response("ok", { status: 200 });
   }
 
-  // 공유 토큰 검증
+  // 오픈 릴레이 방지용 공유 토큰
   if (!TOKEN || req.headers.get("x-proxy-token") !== TOKEN) {
     return new Response("forbidden", { status: 403 });
   }
 
-  // union의 /Ajax/... 경로만 그대로 전달 (쿼리는 무시, union은 POST 본문 사용)
-  const target = UPSTREAM + url.pathname;
   try {
-    const upstream = await fetch(target, {
+    const upstream = await fetch(UPSTREAM + path, {
       method: req.method,
       headers: {
         "content-type":
