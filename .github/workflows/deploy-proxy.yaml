@@ -1,0 +1,28 @@
+name: Deploy union proxy to Deno Deploy
+
+# proxy/union-proxy.ts 가 바뀌면 Deno Deploy로 자동 배포한다.
+# 사전 1회 설정(대시보드): https://dash.deno.com 에서 프로젝트 생성 →
+#   "GitHub Actions" 배포 방식으로 이 repo 연결(OIDC 신뢰 구성) →
+#   환경변수 PROXY_TOKEN 설정. 아래 project 이름을 그 프로젝트명과 맞춘다.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "proxy/union-proxy.ts"
+      - ".github/workflows/deploy-proxy.yaml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Deno Deploy OIDC 인증에 필요
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/deployctl@v1
+        with:
+          project: "union-proxy" # ← Deno Deploy 프로젝트명과 일치시킬 것
+          entrypoint: "proxy/union-proxy.ts"
+          root: "."

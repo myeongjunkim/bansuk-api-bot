@@ -9,13 +9,21 @@ GitHub Actions ──> Deno Deploy 프록시 ──> sum.su.or.kr:8888
    (Azure)          (비-Azure, 포트 8888 OK)
 ```
 
-## 배포 방법
+## 배포 방법 (이 repo CI가 자동 배포)
+
+프록시 코드 배포는 [`.github/workflows/deploy-proxy.yaml`](../.github/workflows/deploy-proxy.yaml)
+가 담당한다. `proxy/union-proxy.ts` 가 main에 푸시되면 Deno Deploy로 자동 배포된다.
+
+**사전 1회 설정(대시보드):**
 
 1. <https://dash.deno.com> 접속 → GitHub 계정으로 로그인(무료).
-2. **New Playground** 생성 → [`union-proxy.ts`](union-proxy.ts) 내용을 통째로 붙여넣기.
-3. 프로젝트 **Settings → Environment Variables** 에 추가:
+2. **New Project** 생성. 프로젝트명은 `union-proxy` 로 한다
+   (deploy-proxy.yaml 의 `project:` 값과 일치해야 함).
+3. 배포 방식으로 **GitHub Actions** 선택 → 이 repo 연결(OIDC 신뢰 구성).
+4. 프로젝트 **Settings → Environment Variables** 에 추가:
    - `PROXY_TOKEN` = 임의의 긴 랜덤 문자열 (예: `openssl rand -hex 24` 결과)
-4. **Save & Deploy** → 배포 URL 확보 (예: `https://union-proxy-xxxx.deno.dev`).
+5. 이후 `proxy/union-proxy.ts` 푸시 시 CI가 자동 배포 → 배포 URL
+   (예: `https://union-proxy-xxxx.deno.dev`) 확보.
 
 ## 배포 후 검증 (프록시가 union에 실제로 닿는지)
 
