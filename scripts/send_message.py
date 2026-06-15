@@ -161,7 +161,9 @@ def create_message(
     return {
         # 푸시 알림 미리보기에 쓰이는 fallback 텍스트. mrkdwn 링크 마크업을
         # 넣으면 알림에 URL이 그대로 노출되므로 순수 텍스트만 사용한다.
-        "text": f"{body_bible.date}({body_bible.week_day})\n{body_bible.title}",
+        # Slack 푸시 배너는 줄바꿈(\n·U+2028·U+2029)을 모두 평탄화하므로,
+        # 날짜와 제목은 구분자로 나눈다. (본문 blocks는 줄바꿈 유지)
+        "text": f"{body_bible.date}({body_bible.week_day}) · {body_bible.title}",
         "blocks": blocks
     }
 
