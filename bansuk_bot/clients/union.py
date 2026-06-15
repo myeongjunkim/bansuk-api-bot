@@ -1,4 +1,5 @@
 # 성서유니온
+import os
 from datetime import datetime
 
 import requests
@@ -11,16 +12,27 @@ import tenacity
 # OS 기본값까지(약 2분) 매달리므로 짧게 끊고 재시도하도록 한다.
 REQUEST_TIMEOUT = (5, 30)
 
+# union API의 직접 주소. GitHub Actions(Azure) egress가 이 서버에 간헐적으로
+# 차단되므로, 비-Azure 네트워크(Deno Deploy 등)에 올린 프록시를 거치도록
+# UNION_BASE_URL 환경변수로 덮어쓸 수 있다. 미설정 시 직접 호출(로컬 등).
+DEFAULT_BASE_URL = "https://sum.su.or.kr:8888"
+
 
 class unionClient:
 
     def __init__(self) -> None:
         self.today = datetime.today().strftime('%Y-%m-%d')
-        self.url = "https://sum.su.or.kr:8888"
+        # 빈 문자열(시크릿 미설정 시 GitHub이 ""로 주입)도 기본값으로 처리하도록 `or` 사용.
+        self.url = (os.environ.get("UNION_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
+        self._proxy_token = os.environ.get("UNION_PROXY_TOKEN") or None
         self.body_top_path = "/Ajax/Bible/BodyTop"
         self.body_bible_path = "/Ajax/Bible/BodyBible"
         self.body_bible_content_path = "/Ajax/Bible/BodyBibleCont"
         self._request_data()
+
+    def _headers(self) -> dict:
+        # 프록시를 오픈 릴레이로 두지 않기 위한 공유 토큰. 직접 호출 시엔 빈 헤더.
+        return {"x-proxy-token": self._proxy_token} if self._proxy_token else {}
 
     @tenacity.retry(
         # 짧은 네트워크 블립(DNS 실패·간헐적 연결 끊김)을 흡수하기 위해
@@ -41,6 +53,7 @@ class unionClient:
         response = requests.post(
             url=self.url + self.body_top_path,
             data={ 'qt_ty' : 'QT1' , 'Base_de' : self.today},
+            headers=self._headers(),
             timeout=REQUEST_TIMEOUT,
         )
         return response.json()
@@ -49,6 +62,7 @@ class unionClient:
         response = requests.post(
             url=self.url + self.body_bible_path,
             data={ 'qt_ty' : 'QT1' , 'Base_de' : self.today},
+            headers=self._headers(),
             timeout=REQUEST_TIMEOUT,
         )
         return response.json()
@@ -57,6 +71,7 @@ class unionClient:
         response = requests.post(
             url=self.url + self.body_bible_content_path,
             data={ 'qt_ty' : 'QT1' , 'Base_de' : self.today, 'Bibletype' : '1'},
+            headers=self._headers(),
             timeout=REQUEST_TIMEOUT,
         )
         return response.json()

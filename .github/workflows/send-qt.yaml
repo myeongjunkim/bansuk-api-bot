@@ -31,6 +31,9 @@ jobs:
           poetry install --sync
 
       - name: send message
+        env:
+          UNION_BASE_URL: ${{ secrets.UNION_BASE_URL }}
+          UNION_PROXY_TOKEN: ${{ secrets.UNION_PROXY_TOKEN }}
         run: |
           poetry run python scripts/send_message.py \
           --webhook_url=${{ secrets.SLACK_QT_WEBHOOK_URI }} \
